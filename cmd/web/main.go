@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
@@ -12,13 +13,14 @@ import (
 )
 
 type application struct {
-	logger   *slog.Logger
-	snippets *models.SnippetModel
+	logger        *slog.Logger
+	snippets      *models.SnippetModel
+	templateCache map[string]*template.Template
 }
 
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP Network Address")
-	dsn := flag.String("dsn", "web:password@tcp(127.0.0.1:3309)/snippetbox?parseTime=true", "MySQL data source name")
+	dsn := flag.String("dsn", "root:rootpass@tcp(127.0.0.1:3306)/snippetbox?parseTime=true", "MySQL data source name")
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
@@ -30,13 +32,17 @@ func main() {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
-
-	app := &application{
-		logger:   logger,
-		snippets: &models.SnippetModel{DB: db},
-	}
-
 	defer db.Close()
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+	app := &application{
+		logger:        logger,
+		snippets:      &models.SnippetModel{DB: db},
+		templateCache: templateCache,
+	}
 	logger.Info("Starting server ", slog.String("addr", "4000"))
 
 	err = http.ListenAndServe(*addr, app.routes())
