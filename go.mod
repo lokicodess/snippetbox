@@ -1,6 +1,8 @@
 module snippetbox.lokeshsingh.dev
 
-go 1.23.0
+go 1.24.0
+
+toolchain go1.24.7
 
 require github.com/go-sql-driver/mysql v1.9.3
 
@@ -10,4 +12,6 @@ require (
 	github.com/alexedwards/scs/v2 v2.9.0 // indirect
 	github.com/go-playground/form/v4 v4.2.1 // indirect
 	github.com/justinas/alice v1.2.0 // indirect
+	github.com/justinas/nosurf v1.2.0 // indirect
+	golang.org/x/crypto v0.42.0 // indirect
 )
